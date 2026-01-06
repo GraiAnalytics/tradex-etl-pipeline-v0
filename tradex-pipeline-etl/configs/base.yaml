@@ -1,0 +1,538 @@
+# configs/base.yaml
+# TradeX ETL Pipeline — Config base (normativo)
+# - Bronze: JSONL.gz + commit atómico + _SUCCESS
+# - Silver/Gold: Parquet + (Iceberg preferido)
+# - Estado: Postgres (prod/dev) o SQLite (solo local)
+# - Timezone: UTC
+
+# =========================
+# 0) GLOBAL
+# =========================
+general:
+  seed: 42
+  timezone: UTC
+  tmp_dir: .tmp
+  cache_dir: .cache
+
+environment:
+  name: dev           # dev | staging | prod
+  run_mode: standard  # standard | backfill
+
+# =========================
+# 1) LOGGING & OBSERVABILITY
+# =========================
+logging:
+  level: INFO
+  jsonl: true
+  to_file: true
+  path: logs/pipeline_{date}.log
+
+observability:
+  metrics:
+    enabled: true
+    sink: logs            # logs | prometheus (futuro)
+  tracing:
+    enabled: false
+
+# =========================
+# 2) STATE STORE (Postgres)
+# =========================
+state_store:
+  backend: postgres       # postgres | sqlite (solo local)
+  postgres:
+    host_env: POSTGRES_HOST
+    port_env: POSTGRES_PORT
+    db_env: POSTGRES_DB
+    user_env: POSTGRES_USER
+    password_env: POSTGRES_PASSWORD
+    schema: tradex_state
+    connect_timeout_seconds: 10
+  sqlite:
+    path: .state/tradex_state.sqlite
+
+# =========================
+# 3) STORAGE (S3/MinIO)
+# =========================
+storage:
+  backend: s3
+  s3:
+    bucket_env: S3_BUCKET
+    prefix: tradex
+    endpoint_env: S3_ENDPOINT          # MinIO en dev; vacío o AWS endpoint en prod
+    region: us-east-1
+    access_key_env: S3_ACCESS_KEY
+    secret_key_env: S3_SECRET_KEY
+    sse:
+      enabled: false                   # true en prod
+      kms_key_id_env: S3_KMS_KEY_ID
+
+  bronze:
+    format: jsonl
+    compression: gzip
+    target_file_size_mb: 128
+    min_file_size_mb: 64
+    max_file_size_mb: 256
+    atomic_commit:
+      tmp_dirname: _tmp
+      success_marker: _SUCCESS
+
+  silver:
+    format: parquet
+    table_format: iceberg              # iceberg | delta | parquet
+    compression: zstd                  # zstd | snappy
+    pq_engine: pyarrow
+    partitioning:
+      enabled: true
+      default_key: event_date          # por defecto (override por tabla)
+    pyarrow:
+      coerce_timestamps: "ms"
+      allow_truncated_timestamps: false
+
+  gold:
+    format: parquet
+    table_format: iceberg
+    compression: zstd
+    pq_engine: pyarrow
+    partitioning:
+      enabled: true
+      default_key: date
+    pyarrow:
+      coerce_timestamps: "ms"
+      allow_truncated_timestamps: false
+
+# =========================
+# 4) RETENTION (opcional)
+# =========================
+retention_days:
+  bronze:
+    default: 90
+    overrides:
+      x: 30
+      news: 90
+      journals: 365
+      reddit: 90
+      youtube: 90
+      sec: 365
+      arxiv: 365
+      market: 180
+  silver: 365
+  gold: 365
+
+# =========================
+# 5) SOURCE CLIENTS (config técnico; no negocio)
+# =========================
+sources:
+  x:
+    plan: basic
+    api:
+      bearer_env: X_BEARER_TOKEN
+      base_url: "https://api.x.com"          # o https://api.twitter.com (según tu client)
+      timeout_seconds: 30
+      retries:
+        max_attempts: 3
+        backoff_seconds: 2
+        jitter: true
+      rate_limit_guard:
+        enabled: true
+        qps_soft_cap: 1.2
+        burst: 3
+        cooloff_seconds_on_429: 60
+      max_results_per_request: 100
+    quotas:
+      posts_cap_month: 15000
+      soft_daily_cap: 450
+      soft_hourly_cap: 40
+      stop_on_cap: true
+
+  market:
+    vendor: alpaca
+    alpaca:
+      api_key_env: ALPACA_API_KEY
+      api_secret_env: ALPACA_API_SECRET
+      base_url_env: ALPACA_BASE_URL          # paper/live según entorno
+      feed: iex                               # iex | sip (según plan)
+      timeout_seconds: 30
+      retries:
+        max_attempts: 3
+        backoff_seconds: 2
+        jitter: true
+      rate_limit_guard:
+        enabled: true
+        qps_soft_cap: 8
+
+  reddit:
+    client_id_env: REDDIT_CLIENT_ID
+    client_secret_env: REDDIT_CLIENT_SECRET
+    user_agent: "tradex-etl/0.1"
+    timeout_seconds: 30
+    retries:
+      max_attempts: 3
+      backoff_seconds: 2
+      jitter: true
+
+  youtube:
+    api_key_env: YOUTUBE_API_KEY
+    timeout_seconds: 30
+    retries:
+      max_attempts: 3
+      backoff_seconds: 2
+      jitter: true
+    quota_guard:
+      enabled: true
+
+  rss:
+    timeout_seconds: 20
+    retries:
+      max_attempts: 3
+      backoff_seconds: 2
+      jitter: true
+
+  sec:
+    user_agent: "TradeX ETL (contact: you@example.com)"
+    timeout_seconds: 30
+    retries:
+      max_attempts: 3
+      backoff_seconds: 2
+      jitter: true
+
+  arxiv:
+    base_url: "http://export.arxiv.org/api/query"
+    timeout_seconds: 30
+    retries:
+      max_attempts: 3
+      backoff_seconds: 2
+      jitter: true
+
+# =========================
+# 6) SILVER/GOLD PROCESSING KNOBS (genéricos)
+# =========================
+text:
+  languages: [en, es]
+  min_chars: 60
+  keep_short_texts: true
+  per_source_min_chars:
+    x: 20
+    news: 80
+    journals: 120
+    reddit: 60
+    youtube: 40
+    sec: 200
+    arxiv: 200
+  lang_detect_fallback: true
+  normalization:
+    unicode_nfkc: true
+    strip_control_chars: true
+    trim_whitespace: true
+  dedupe:
+    near_duplicate_threshold: 0.88
+    by: [text_hash, url, external_id]
+
+market:
+  trading_calendar: XNYS
+  session:
+    include_pre: false
+    include_post: false
+
+late_data:
+  silver_allowed_lateness_days: 7
+  gold_reprocess_window_days: 30
+
+# =========================
+# 7) SIGNAL / METRICS DEFAULTS (Gold)
+# =========================
+metrics:
+  market:
+    price_change_windows_days: [1, 7, 30]
+    volatility_baseline_days: 30
+    volume_baseline_days: 30
+  social:
+    activity_windows_days: [1, 7, 30]
+
+signals:
+  rules_config: "configs/rules/events.yaml"
+  versions:
+    metric_version: v1
+    baseline_version: v1
+    feature_version: v1
+    signal_version: v1
+
+# =========================
+# 8) DATASETS (corazón del ETL)
+# =========================
+datasets:
+
+  # -------------------------
+  # BRONZE DATASETS
+  # -------------------------
+  bronze:
+
+    x.posts:
+      enabled: true
+      source_system: x
+      dataset: posts
+      extractor: x.recent_search
+      extraction:
+        mode: incremental
+        cursor:
+          type: start_time
+          lookback_minutes: 120
+        params:
+          # (GENÉRICO) Se recomienda mover queries a un archivo dedicado
+          # y referenciarlo aquí (ver "qué debes configurar").
+          query: "(AAPL OR $AAPL OR Apple) lang:en"
+          max_results_per_request: 100
+          max_pages: 20
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "*/10 * * * *"
+
+    market.daily_prices:
+      enabled: true
+      source_system: market
+      dataset: daily_prices
+      extractor: market.alpaca_daily_bars
+      extraction:
+        mode: incremental
+        cursor:
+          type: date
+        params:
+          symbols: ["AAPL", "MSFT", "NVDA"]
+          adjustment: "raw"
+          max_days_per_run: 30
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "0 3 * * *"
+
+    news.articles_rss:
+      enabled: true
+      source_system: news
+      dataset: articles_rss
+      extractor: rss.articles
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 720
+        params:
+          feeds_config: "configs/feeds_news.yaml"
+          max_items_per_feed: 200
+          lang_whitelist: [en, es]
+          strip_html: true
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "*/30 * * * *"
+
+    journals.articles_rss:
+      enabled: true
+      source_system: journals
+      dataset: articles_rss
+      extractor: rss.journals
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 10080
+        params:
+          feeds_config: "configs/feeds_journals.yaml"
+          max_items_per_feed: 200
+          lang_whitelist: [en, es]
+          strip_html: true
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "0 */6 * * *"
+
+    reddit.posts:
+      enabled: true
+      source_system: reddit
+      dataset: posts
+      extractor: reddit.search_posts
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 720
+        params:
+          subs: [stocks, wallstreetbets, investing, technology]
+          search_query: "NVIDIA"
+          max_posts: 300
+          score_min: 5
+          comments_min: 1
+          upvote_ratio_min: 0.6
+          language_whitelist: [en, es]
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "*/30 * * * *"
+
+    youtube.comments:
+      enabled: false
+      source_system: youtube
+      dataset: comments
+      extractor: youtube.comments
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 1440
+        params:
+          channels_config: "configs/youtube_channels.yaml"
+          max_comments_per_video: 500
+          lang_whitelist: [en, es]
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "0 */2 * * *"
+
+    sec.filings:
+      enabled: false
+      source_system: sec
+      dataset: filings
+      extractor: sec.filings
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 10080
+        params:
+          forms: ["8-K", "10-K", "10-Q"]
+          cik_allowlist: []
+          max_items: 500
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "0 */6 * * *"
+
+    arxiv.papers:
+      enabled: false
+      source_system: arxiv
+      dataset: papers
+      extractor: arxiv.search
+      extraction:
+        mode: incremental
+        cursor:
+          type: event_time
+          lookback_minutes: 10080
+        params:
+          categories: ["cs.AI", "cs.LG", "quant-ph"]
+          max_results: 200
+      dedup:
+        strategy: source_id_then_hash
+      schedule:
+        cron: "0 */6 * * *"
+
+  # -------------------------
+  # SILVER TABLES
+  # -------------------------
+  silver:
+
+    silver_entity_master:
+      enabled: true
+      inputs:
+        - bronze:x.posts
+        - bronze:reddit.posts
+        - bronze:news.articles_rss
+        - bronze:journals.articles_rss
+        - bronze:sec.filings
+        - bronze:arxiv.papers
+      partitioning:
+        key: event_date
+      late_data:
+        allowed_lateness_days: 7
+      quality:
+        fail_on_error: true
+
+    silver_social_events:
+      enabled: true
+      inputs:
+        - bronze:x.posts
+        - bronze:reddit.posts
+        - bronze:youtube.comments
+        - bronze:news.articles_rss
+        - bronze:journals.articles_rss
+      partitioning:
+        key: event_date
+      late_data:
+        allowed_lateness_days: 7
+      quality:
+        fail_on_error: true
+
+    silver_market_daily:
+      enabled: true
+      inputs:
+        - bronze:market.daily_prices
+      partitioning:
+        key: date
+      quality:
+        fail_on_error: true
+
+  # -------------------------
+  # GOLD DATA PRODUCTS
+  # -------------------------
+  gold:
+
+    gold_market_entity_day:
+      enabled: true
+      inputs:
+        - silver:silver_market_daily
+        - silver:silver_entity_master
+      partitioning:
+        key: date
+      versions:
+        metric_version: v1
+
+    gold_social_entity_day:
+      enabled: true
+      inputs:
+        - silver:silver_social_events
+        - silver:silver_entity_master
+      partitioning:
+        key: date
+      versions:
+        metric_version: v1
+
+    gold_baselines_entity_day:
+      enabled: true
+      inputs:
+        - gold:gold_market_entity_day
+        - gold:gold_social_entity_day
+      partitioning:
+        key: date
+      params:
+        baseline_window_days: 30
+      versions:
+        baseline_version: v1
+
+    gold_entity_day_features:
+      enabled: true
+      inputs:
+        - gold:gold_market_entity_day
+        - gold:gold_social_entity_day
+        - gold:gold_baselines_entity_day
+      partitioning:
+        key: date
+      versions:
+        feature_version: v1
+
+    gold_signal_events:
+      enabled: true
+      inputs:
+        - gold:gold_entity_day_features
+      partitioning:
+        key: date
+      params:
+        rules_config: "configs/rules/events.yaml"
+      versions:
+        signal_version: v1
+
+    gold_entity_daily_summary:
+      enabled: true
+      inputs:
+        - gold:gold_market_entity_day
+        - gold:gold_social_entity_day
+        - gold:gold_signal_events
+      partitioning:
+        key: date

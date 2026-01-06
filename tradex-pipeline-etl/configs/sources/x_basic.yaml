@@ -1,0 +1,159 @@
+# configs/x_basic.yaml — robusto para Plan Basic
+
+plan: basic
+timezone: America/Santiago
+
+quotas:
+  posts_cap_month: 15000          # presupuesto mensual
+  soft_daily_cap: 450             # ~15k/mes / 30 ≈ 500 → 450 para holgura
+  soft_hourly_cap: 40             # conservador; ajusta según consumo real
+  stop_on_cap: true               # detiene ingesta si supera el tope
+
+api:
+  base_url: "https://api.twitter.com/2"   # <- corregido (era api.x.com)
+  bearer_env: "X_BEARER_TOKEN"
+  timeout_seconds: 30
+  retries:
+    max_attempts: 3
+    backoff_seconds: 2
+    jitter: true
+  rate_limit_guard:
+    enabled: true
+    qps_soft_cap: 1.2
+    burst: 3
+    cooloff_seconds_on_429: 60
+
+request_defaults:
+  tweet_fields: "created_at,public_metrics,lang,entities"
+  user_fields:  "username,name,verified,public_metrics"
+  expansions:   "author_id"
+
+storage:
+  raw_dir: data/raw/x
+  counts_dir: data/raw/x/_counts
+  digest_dir: data/raw/x/_digests
+  state_dir: data/raw/x/_state          # since_id, contadores, budgets
+  format: parquet                       # parquet | csv
+  compression: zstd
+
+# ====== QUERIES =======================================================
+queries:
+  rules_path: configs/rules/queries.yaml   # usa tu plantilla + overrides
+  langs_map_default: '(lang:en OR lang:es)'
+  filters_default: '-is:retweet -is:reply' # las quotes se controlan por modo
+  free_mode_sanitizer: false               # Basic no necesita sanitizar agresivo
+  require_cashtag_from_companies: true     # respeta require_cashtag en companies.yaml
+  lookback_hours_default: 24
+  per_query:
+    max_results: 25                        # ahorro de presupuesto por defecto
+    pages: 1                               # escala sólo en spikes/eventos
+  since_id_tracking: true                  # incremental por query/ticker
+  heavy_tickers:
+    # si necesitas más cobertura en estos, sube límites localmente
+    list: [NVDA, TSLA, INTC, GOOG, IBM]
+    max_results: 50
+    pages: 1
+
+windows:
+  # concentra presupuesto donde más rinde (ET mercado + earnings)
+  market_hours_et:
+    enabled: true
+    tz: America/New_York
+    days: [Mon, Tue, Wed, Thu, Fri]
+    start: "09:30"
+    end:   "16:00"
+    cap_multiplier: 1.25     # 25% más requests permitidas
+  off_hours:
+    cap_multiplier: 0.75     # reduce consumo fuera de mercado
+
+dedupe:
+  keys: ["tweet_id", "url", "text_hash"]
+  canonicalize_url: true
+  fuzzy:
+    enabled: true
+    fields: ["text"]
+    similarity_threshold: 0.90
+
+normalization:
+  keep_quotes: true          # permite analizar cadenas de reacción
+  keep_urls: true
+  extract_cashtags: true
+  lang_detect_fallback: true
+
+# ====== COUNTS (search/counts) =======================================
+counts:
+  enable: true
+  interval_minutes: 30
+  granularity: hour              # hour | day
+  lookback_days: 7
+  spike_z: 2.5                   # umbral μ + z·σ
+  min_count_trigger: 5
+  zscore_window_hours: 72
+  fill_missing: true
+
+# ====== DIGEST (búsqueda diaria base) ================================
+digest:
+  enable: true
+  per_ticker_per_day: 1           # conservador: 1 digest por símbolo/día
+  max_results_per_request: 25
+  languages: [en, es]
+  base_filters: "-is:retweet -is:reply -is:quote"
+  sort_order: relevancy          # si no está soportado, tu cliente cae a recency
+  jitter_seconds_between_calls: 1.2
+
+# ====== INFLUENCERS ===================================================
+influencers:
+  enable: true
+  min_mentions_7d: 3
+  min_followers: 10000
+  top_engagement_percentile: 0.80
+  top_k_watchlist: 50
+  include_company_watch_handles: true   # usa watch_handles desde companies.yaml
+  score:
+    # S = log10(followers+1) * sqrt(rt + 2*quotes + likes/4 + replies/2) / max(1, age_hours)
+    followers_log_base: 10
+    weight_retweets: 1.0
+    weight_quotes: 2.0
+    weight_likes: 0.25
+    weight_replies: 0.5
+    time_decay_hours: 1.0
+
+# ====== SPIKES (ingesta puntual intensiva) ============================
+spike_ingest:
+  enable: true
+  mode: event             # base | event | both
+  lookback_hours: 6
+  results_per_spike: 25
+  pages: 2                # Basic permite >1; escalar con cuidado
+  cooldown_minutes: 45
+  escalate_pages_by_severity:
+    enabled: true
+    # se conecta con signals_map.yaml (critical/high/..); si no, usa 'pages'
+    pages_for:
+      critical: 2
+      high: 2
+      medium: 1
+      low: 1
+  prioritize_pending:
+    enabled: true
+    top_n: 10            # prioriza ≤10 símbolos con mayor backlog de feedback
+    min_pending: 1       # requiere al menos 1 feedback pendiente por ticker
+
+# ====== ERRORES & SEGURIDAD ==========================================
+error_policy:
+  on_400_retry_with_sanitizer: true   # reintento sin paréntesis/comillas si 400
+  on_429_backoff_seconds: 60
+  drop_on_parse_error: false
+  log_payload_on_error: true
+
+safety:
+  dry_run: false                      # en desarrollo puedes poner true
+  respect_quiet_hours:
+    enabled: false                    # la notificación la gestiona alerts.yaml
+  pii_scrub: false
+
+monitoring:
+  audit_log: logs/x_ingest_{date}.jsonl
+  smoke_checks:
+    recent_files_minutes: 180
+    expect_min_rows_per_run: 1
