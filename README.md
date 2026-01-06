@@ -1,4 +1,3 @@
-````markdown
 # TradeX – Data Pipeline ETL
 
 Pipeline ETL **profesional y escalable** para **TradeX**, orientado a la ingestión, normalización y generación de **señales accionables para el mercado financiero** a partir de:
@@ -20,7 +19,6 @@ El pipeline está diseñado bajo una arquitectura **Bronze / Silver / Gold**, co
 
 ## 📐 Arquitectura de alto nivel
 
-```text
 FUENTES EXTERNAS
 (X, Reddit, YouTube, RSS, SEC, arXiv, Alpaca)
         |
