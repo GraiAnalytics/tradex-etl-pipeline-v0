@@ -1,0 +1,28 @@
+# ==============================================================================
+# arxiv.yaml — arXiv API query configuration
+#
+# Documentation: https://info.arxiv.org/help/api/user-manual.html
+# API Target:    arXiv API (export.arxiv.org/api/query) — Atom 1.0 feed
+# Date:          2026-01-06 (America/Santiago)
+# Reviewed by:   Joaquin Cabello
+#
+# Notes:
+# - arXiv updates API search results on the daily cycle; <updated> reflects 00:00
+#   US Eastern Time for the day you call the API.
+# - Rate limiting: keep <= 1 request every ~3 seconds across machines.
+# ==============================================================================
+# Changelog:
+# - 2026-01-06: Added sortBy/sortOrder and documented submission_hour.
+
+
+search_query:   # string: None
+id_list:        # string: None
+start:          # int: 0 -> defines the index of the first returned result, using 0-based indexing.
+max_results:    # int: 10 ->  limited to 30000 in slices of at most 2000 at a time
+rate_limit:     # float: 0.33 -> request/second. the rate limit is 1 requeste every 3 seconds on all machines
+
+sortBy: submittedDate # str: -> submittedDate | lastUpdatedDate | relevance
+sortOrder: descending # str: -> ascending | descending
+
+submission_hour: T0000 # 00:00 US Eastern Time 
+
