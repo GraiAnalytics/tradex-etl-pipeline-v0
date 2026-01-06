@@ -1,7 +1,10 @@
-```markdown
+````markdown
 # TradeX – Data Pipeline ETL
 
-Pipeline ETL profesional y escalable para **TradeX**, orientado a la ingestión, normalización y generación de **señales accionables para el mercado financiero** a partir de datos alternativos (X/Twitter, Reddit, YouTube, News/RS S, SEC, arXiv, journals) y datos de mercado (**Alpaca**).
+Pipeline ETL **profesional y escalable** para **TradeX**, orientado a la ingestión, normalización y generación de **señales accionables para el mercado financiero** a partir de:
+
+- datos alternativos (X/Twitter, Reddit, YouTube, News/RSS, SEC, arXiv, journals)
+- datos de mercado (Alpaca)
 
 El pipeline está diseñado bajo una arquitectura **Bronze / Silver / Gold**, con foco en:
 
@@ -17,45 +20,43 @@ El pipeline está diseñado bajo una arquitectura **Bronze / Silver / Gold**, co
 
 ## 📐 Arquitectura de alto nivel
 
-```
-
+```text
 FUENTES EXTERNAS
-(X Basic API v2, Reddit, YouTube, RSS News/Journals, SEC, arXiv, Alpaca)
-│
-▼
-┌────────────────────┐
-│      BRONZE        │  Raw, auditable, immutable (run_id + manifest + _SUCCESS)
-│     (JSONL.gz)     │  Particionado por ingest_date, commit atómico por run
-└────────────────────┘
-│
-▼
-┌────────────────────┐
-│      SILVER        │  Clean, normalized, canonical (entity-resolved)
-│ (Parquet/Iceberg)  │  Dedup semántico + late data + schema drift handling
-└────────────────────┘
-│
-▼
-┌────────────────────┐
-│       GOLD         │  Data products: metrics, baselines, features, signals
-│ (serving-ready)    │  Señales explicables (drivers + confidence)
-└────────────────────┘
-│
-▼
-UI / API / ALERTS / ML MODELS
+(X, Reddit, YouTube, RSS, SEC, arXiv, Alpaca)
+        |
+        v
+      BRONZE
+   (raw / immutable)
+        |
+        v
+      SILVER
+ (clean / canonical)
+        |
+        v
+       GOLD
+ (metrics / signals)
+        |
+        v
+ UI / API / ALERTS / ML
+````
 
-```
+* **Bronze**: datos crudos, auditables y append-only (`JSONL.gz`, run_id + manifest + `_SUCCESS`)
+* **Silver**: datos limpios y canónicos (`Parquet/Iceberg`, entity-resolved)
+* **Gold**: data products y señales explicables, listos para serving
+
+La especificación completa de cada capa está en `/docs/architecture`.
 
 ---
 
 ## 🎯 Objetivos del pipeline
 
-- Ingestar múltiples fuentes heterogéneas sin perder información (**raw payload preservado en Bronze**)
-- Normalizar y resolver entidades de forma consistente (`entity_id`)
-- Calcular métricas relativas (baselines, deltas, z-scores)
-- Detectar señales explicables (spikes, anomalías, divergencias)
-- Servir datos listos para UI, alertas y modelos ML (tablas Gold “serving-ready”)
-- Permitir reprocesamiento y auditoría completa (**run_id + manifest + state store**)
-- Soportar incremental + backfills con la misma lógica (sin hacks)
+* Ingestar múltiples fuentes heterogéneas sin perder información (**raw payload preservado en Bronze**)
+* Normalizar y resolver entidades de forma consistente (`entity_id`)
+* Calcular métricas relativas (baselines, deltas, z-scores)
+* Detectar señales explicables (spikes, anomalías, divergencias)
+* Servir datos listos para UI, alertas y modelos ML
+* Permitir reprocesamiento y auditoría completa (**run_id + manifest + state store**)
+* Soportar incremental y backfills con la misma lógica (sin hacks)
 
 ---
 
@@ -63,109 +64,116 @@ UI / API / ALERTS / ML MODELS
 
 ### 🟤 Bronze (Raw / Ingest)
 
-Bronze es un **log de ingestas** con commits atómicos por `run_id`.
+Bronze es un **log de ingestas inmutable** con commit atómico por `run_id`.
 
-- Copia fiel de las fuentes externas (con envelope estándar)
-- Inmutable, versionada por `run_id`
-- Incluye metadata técnica (`ingest_time`, `event_time`, `cursor`, `params`)
-- Manifiesto por corrida (`manifest.json`) y marcador `_SUCCESS`
-- Idempotencia: dedup in-run + dedup persistente (Postgres) para evitar duplicados en re-runs/backfills
+* Copia fiel de las fuentes externas (con envelope estándar)
+* Versionado y auditabilidad total
+* Metadata técnica (`ingest_time`, `event_time`, `cursor`, `params`)
+* Manifiesto por corrida (`manifest.json`) y marcador `_SUCCESS`
+* Deduplicación in-run + persistente (Postgres)
 
-Ejemplos (dataset_key → path):
-- `x.posts` → `bronze/source_system=x/dataset=posts/...`
-- `market.daily_prices` → `bronze/source_system=market/dataset=daily_prices/...`
-- `sec.filings` → `bronze/source_system=sec/dataset=filings/...`
+Ejemplos de datasets:
 
-**Especificación exacta**: `docs/architecture/01_bronze.md`
+* `x.posts`
+* `market.daily_prices`
+* `reddit.posts`
+* `youtube.comments`
+* `sec.filings`
+
+📄 Especificación: `docs/architecture/01_bronze.md`
 
 ---
 
 ### ⚪ Silver (Clean / Canonical)
 
-Silver define el **modelo canónico**: tipado fuerte + normalización + consistencia inter-fuentes.
+Silver define la **verdad estructural** del sistema.
 
-- Datos limpios, tipados y normalizados
-- Resolución de entidades (`entity_id`) y mapeos consistentes
-- Deduplicación semántica (además del dedup por ID)
-- Manejo de late data (reprocessing window) y schema drift controlado
-- Base confiable para análisis, features y entrenamiento ML
+* Datos limpios, tipados y normalizados
+* Resolución determinística de entidades (`entity_id`)
+* Deduplicación semántica
+* Manejo de late data y schema drift
+* Base confiable para análisis, features y señales
 
-Tablas core:
-- `silver_entity_master`
-- `silver_social_events`
-- `silver_market_daily`
+Tablas canónicas:
+
+* `silver_entity_master`
+* `silver_social_events`
+* `silver_market_daily`
+
+📄 Especificación: `docs/architecture/02_silver.md`
 
 ---
 
 ### 🟡 Gold (Business / Signals)
 
-Gold son **data products** listos para consumo.
+Gold es la capa de **productos de datos**.
 
-- Métricas finales (market + social)
-- Baselines y features versionadas (`feature_version`, `signal_version`)
-- Señales detectadas con drivers, severidad y confianza
-- Serving tables optimizadas para UI, feeds y alertas
+* Métricas finales (market + social)
+* Baselines y features versionadas
+* Señales explicables con drivers y confidence
+* Tablas optimizadas para UI, feeds y alertas
 
 Ejemplos:
-- `gold_market_entity_day`
-- `gold_social_entity_day`
-- `gold_baselines_entity_day`
-- `gold_signal_events`
-- `gold_entity_daily_summary`
+
+* `gold_market_entity_day`
+* `gold_social_entity_day`
+* `gold_baselines_entity_day`
+* `gold_signal_events`
+* `gold_entity_daily_summary`
+
+📄 Especificación: `docs/architecture/03_gold.md`
 
 ---
 
 ## 🧩 Datasets soportados (v0)
 
 ### Social / Alt-data
-- **X (Twitter) – Basic (API v2)**:
-  - `x.posts` (recent search con cursor `start_time` + lookback + dedup)
-  - opcional: `x.counts`, `x.usage` (si los habilitas)
-- `reddit.posts`
-- `youtube.comments`
-- `news.articles_rss`
-- `journals.articles_rss`
-- `sec.filings`
-- `arxiv.papers`
+
+* **X (Twitter) – Basic (API v2)**
+  `x.posts` (recent search con cursor `start_time` + lookback + dedup)
+* `reddit.posts`
+* `youtube.comments`
+* `news.articles_rss`
+* `journals.articles_rss`
+* `sec.filings`
+* `arxiv.papers`
 
 ### Market
-- **Alpaca**:
-  - `market.daily_prices`
+
+* **Alpaca**
+  `market.daily_prices`
 
 ---
 
-## 🛠️ Stack tecnológico (default)
+## 🛠️ Stack tecnológico
 
-- **Lenguaje**: Python 3.11+
-- **Orquestación**: Dagster (Python-first, asset/job based)
-- **Storage**: S3-compatible (MinIO dev / S3 prod)
-- **Formato**:
-  - Bronze: **JSONL.gz** (run-based, auditable)
-  - Silver/Gold: Parquet (+ Iceberg/Delta opcional según engine)
-- **Estado/Metadata**: Postgres (prod y local via docker)
-- **Data Quality**: contracts + quality gates + quarantine
-- **Observabilidad**: logs estructurados + métricas por run (counts, latency, errors, drift)
+* **Lenguaje**: Python 3.11+
+* **Orquestación**: Dagster (Python-first)
+* **Storage**: S3-compatible (MinIO dev / S3 prod)
+* **Formato**:
+
+  * Bronze: JSONL.gz
+  * Silver / Gold: Parquet + Iceberg (o Delta)
+* **Estado / Metadata**: Postgres
+* **Data Quality**: contracts + quality gates + quarantine
+* **Observabilidad**: logs estructurados + métricas por run
 
 ---
 
 ## 📁 Estructura del repositorio (resumen)
 
-```
-
+```text
 src/tradex_pipeline/
-├─ sources/        # extractores por fuente (X, Alpaca, SEC, RSS, etc.)
-├─ bronze/         # runner genérico + envelopes + manifests + writer + dedup
-├─ silver/         # parsers + transforms + quality + writer
-├─ gold/           # metrics + baselines + features + signals + serving
-├─ contracts/      # definición de datasets, llaves, particiones, versiones
-├─ state/          # pipeline_state + bronze_runs + bronze_record_index (Postgres)
-├─ orchestration/  # dagster resources/jobs/schedules
-├─ alerts/         # dispatch de alertas (webhook/kafka/slack opcional)
-└─ common/         # utils compartidos
-
-````
-
-La estructura completa y las decisiones están documentadas en `/docs/architecture`.
+├─ sources/        # extractores por fuente
+├─ bronze/         # runner + envelopes + manifests + dedup
+├─ silver/         # parsers + transforms + quality
+├─ gold/           # metrics + baselines + signals + serving
+├─ contracts/      # definición formal de datasets
+├─ state/          # cursores, watermarks, dedup (Postgres)
+├─ orchestration/  # dagster jobs / schedules
+├─ alerts/         # dispatch de alertas
+└─ common/         # utilidades compartidas
+```
 
 ---
 
@@ -173,19 +181,19 @@ La estructura completa y las decisiones están documentadas en `/docs/architectu
 
 ### 1️⃣ Requisitos
 
-- Python 3.11+
-- Docker + Docker Compose
-- Poetry
-- Make (opcional, recomendado)
+* Python 3.11+
+* Docker + Docker Compose
+* Poetry
+* Make (opcional)
 
 ---
 
-### 2️⃣ Clonar el repo
+### 2️⃣ Clonar el repositorio
 
 ```bash
 git clone git@github.com:tradex-ai/tradex-pipeline-etl.git
 cd tradex-pipeline-etl
-````
+```
 
 ---
 
@@ -195,12 +203,12 @@ cd tradex-pipeline-etl
 cp .env.example .env
 ```
 
-Completa como mínimo:
+Configura al menos:
 
-* credenciales de X (Bearer Token) — **Basic API v2**
-* credenciales de Alpaca (API Key / Secret + endpoint market data)
-* credenciales de storage (MinIO/S3)
-* configuración Postgres
+* X API v2 (Basic)
+* Alpaca Market Data
+* Storage (MinIO/S3)
+* Postgres
 
 ---
 
@@ -210,11 +218,11 @@ Completa como mínimo:
 docker-compose up -d
 ```
 
-Esto levanta:
+Servicios:
 
-* MinIO (object storage S3-compatible)
-* Postgres (state store + metadata)
-* servicios auxiliares (según compose)
+* MinIO
+* Postgres
+* dependencias del pipeline
 
 ---
 
@@ -229,23 +237,23 @@ poetry shell
 
 ## ▶️ Ejecución de pipelines
 
-> Nota: usamos `dataset_key` del estilo `source.dataset` (ej: `x.posts`, `market.daily_prices`).
+> Los datasets se ejecutan con `dataset_key = source.dataset`.
 
-### Ingesta Bronze
+### Bronze
 
 ```bash
 python -m tradex_pipeline.cli run bronze x.posts
 python -m tradex_pipeline.cli run bronze market.daily_prices
 ```
 
-### Construcción Silver
+### Silver
 
 ```bash
 python -m tradex_pipeline.cli run silver social_events
 python -m tradex_pipeline.cli run silver market_daily
 ```
 
-### Construcción Gold
+### Gold
 
 ```bash
 python -m tradex_pipeline.cli run gold build_metrics
@@ -257,7 +265,7 @@ python -m tradex_pipeline.cli run gold build_serving
 
 ## 🔁 Backfills
 
-Ejemplo: backfill de X posts por rango de fechas
+Ejemplo: backfill temporal de X posts
 
 ```bash
 python -m tradex_pipeline.cli backfill \
@@ -269,45 +277,47 @@ python -m tradex_pipeline.cli backfill \
 
 Reglas:
 
-* Bronze crea nuevos `run_id` (no pisa runs previos)
-* Dedup persistente evita duplicados
-* Silver/Gold se regeneran desde Bronze sin tocar fuentes externas
+* Bronze genera nuevos `run_id`
+* Dedup evita duplicados
+* Silver y Gold se recalculan desde Bronze
 
 ---
 
 ## 🧪 Data Quality
 
-* Cada dataset tiene **contracts** en `src/tradex_pipeline/contracts/`
-* Silver y Gold aplican **quality gates**
-* Registros inválidos van a **quarantine**
-* Fallos críticos bloquean publicación aguas abajo (no “datos a medias”)
+* Contracts por dataset (`contracts/`)
+* Quality gates en Silver y Gold
+* Registros inválidos → quarantine
+* Fallos críticos bloquean publicación
 
 ---
 
 ## 📊 Observabilidad
 
-Por cada `run_id` se registran:
+Por cada `run_id` se mide:
 
-* volumen de datos (fetched / written / deduped)
-* latencia por etapa (fetch / write / commit)
-* errores por tipo (429, 5xx, timeout)
-* lag de event_time (si aplica)
-* drift de esquema (fingerprints)
+* volumen de datos
+* latencia por etapa
+* errores por tipo
+* lag temporal
+* drift de esquema
 
 Alertas automáticas ante:
 
 * fallos consecutivos
-* caídas bruscas de volumen
-* schema drift significativo
+* anomalías de volumen
+* pérdida de frescura
+
+📄 Detalle: `docs/architecture/06_observability.md`
 
 ---
 
 ## 🔐 Seguridad
 
-* Secrets vía `.env` / Secret Manager
-* Storage cifrado en reposo
-* Acceso por roles a Bronze/Silver/Gold
-* Retención configurable por capa (políticas por entorno)
+* Secrets vía `.env` o secret manager
+* Storage cifrado
+* Acceso por roles a Bronze / Silver / Gold
+* Retención configurable por capa
 
 ---
 
@@ -322,6 +332,22 @@ Alertas automáticas ante:
   * reproducible
   * explicable
   * auditable
-* Agregar una nueva fuente debe ser mayormente:
+* Agregar una nueva fuente = extractor + config + contract
 
-  * extractor + config + contract (no “un script nuevo”)
+---
+
+## 📌 Próximos pasos
+
+1. Revisar `/docs/architecture`
+2. Completar `configs/base.yaml`
+3. Ejecutar los primeros datasets Bronze
+4. Publicar las primeras tablas Silver
+5. Activar señales Gold
+
+---
+
+## 📬 Proyecto
+
+**TradeX** es una plataforma enfocada en **señales de mercado basadas en datos alternativos**, combinando ingeniería de datos, modelos financieros/estadísticos, ML/DL y una capa agéntica de IA para alertas rápidas.
+
+```
