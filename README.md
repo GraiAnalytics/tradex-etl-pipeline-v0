@@ -36,7 +36,6 @@ FUENTES EXTERNAS
         |
         v
  UI / API / ALERTS / ML
-````
 
 * **Bronze**: datos crudos, auditables y append-only (`JSONL.gz`, run_id + manifest + `_SUCCESS`)
 * **Silver**: datos limpios y canónicos (`Parquet/Iceberg`, entity-resolved)
