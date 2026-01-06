@@ -11,9 +11,6 @@
 #   US Eastern Time for the day you call the API.
 # - Rate limiting: keep <= 1 request every ~3 seconds across machines.
 # ==============================================================================
-# Changelog:
-# - 2026-01-06: Added sortBy/sortOrder and documented submission_hour.
-
 
 search_query:   # string: None
 id_list:        # string: None

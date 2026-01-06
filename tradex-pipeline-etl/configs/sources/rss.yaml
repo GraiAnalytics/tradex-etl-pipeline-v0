@@ -1,0 +1,145 @@
+# ==============================================================================
+# rss.yaml — configuración de feeds RSS (journals + news)
+# Date: 2026-01-06 (America/Santiago)
+# Reviewed by: Joaquin Cabello
+#
+# Notes:
+# - Secciones: rss_journals y rss_news (deben coincidir con --section).
+# - max_items: límite global de ítems por feed (si está vacío, el runner puede traer todos).
+# - lang_whitelist: idiomas permitidos a nivel feed (en/es).
+# - poll_interval_minutes: frecuencia sugerida de polling (si aplica en el scheduler).
+# - expect_min_items_per_7d: sanity-check/alerta si el feed viene “muerto”.
+# ==============================================================================
+
+max_items: 10            # int|None: límite global de ítems por feed (vacío = sin override / depende del runner)
+lang_whitelist: [en, es] # list[str]: idiomas permitidos (ej: [en, es])
+
+# =====================================================================
+#                           JOURNALS / REVISTAS
+# =====================================================================
+
+rss_journals:
+  - name: PRX Quantum (APS)
+    url: https://feeds.aps.org/rss/recent/prxquantum.xml
+    weight: 1.0
+    lang: en
+    country: US
+    tier: T1
+    category: quantum
+    poll_interval_minutes: 60
+    expect_min_items_per_7d: 10
+    disabled: false
+
+  - name: npj Quantum Information (Nature)
+    url: https://www.nature.com/npjqi.rss
+    weight: 1.0
+    lang: en
+    country: UK
+    tier: T1
+    category: quantum
+    poll_interval_minutes: 60
+    expect_min_items_per_7d: 5
+    disabled: false
+
+  - name: Quantum (Open-Access)
+    url: https://quantum-journal.org/feed/
+    weight: 1.0
+    lang: en
+    country: EU
+    tier: T1
+    category: quantum
+    poll_interval_minutes: 60
+    expect_min_items_per_7d: 5
+    disabled: false
+
+# =====================================================================
+#                                 NEWS
+# =====================================================================
+
+rss_news:
+  - name: The Quantum Insider
+    url: https://thequantuminsider.com/feed/
+    weight: 1.0
+    lang: en
+    country: US
+    tier: T2
+    category: quantum
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 5
+
+  - name: Inside Quantum Technology
+    url: https://www.insidequantumtechnology.com/feed/
+    weight: 1.0
+    lang: en
+    country: US
+    tier: T2
+    category: quantum
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 5
+
+  # ——— sectores adicionales (deshabilitados hasta verificar URL) ———
+  - name: STAT News (Biotech)
+    url: ""
+    weight: 0.8
+    lang: en
+    country: US
+    tier: T2
+    category: biotech
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 20
+    disabled: true
+
+  - name: Fierce Biotech
+    url: ""
+    weight: 0.8
+    lang: en
+    country: US
+    tier: T2
+    category: biotech
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 20
+    disabled: true
+
+  - name: Endpoints News
+    url: ""
+    weight: 0.7
+    lang: en
+    country: US
+    tier: T2
+    category: biotech
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 20
+    disabled: true
+
+  - name: ETF Trends
+    url: ""
+    weight: 0.7
+    lang: en
+    country: US
+    tier: T3
+    category: etfs
+    poll_interval_minutes: 60
+    expect_min_items_per_7d: 10
+    disabled: true
+
+  - name: Semiconductor Industry News (generic)
+    url: ""
+    weight: 0.7
+    lang: en
+    country: US
+    tier: T3
+    category: semiconductors
+    poll_interval_minutes: 30
+    expect_min_items_per_7d: 15
+    disabled: true
+
+  - name: LatAm Markets (generic)
+    url: ""
+    weight: 0.7
+    lang: es
+    country: AR
+    tier: T3
+    category: latam
+    poll_interval_minutes: 60
+    expect_min_items_per_7d: 10
+    disabled: true
