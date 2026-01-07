@@ -1,0 +1,52 @@
+# ==============================================================================
+# sec.yaml — configuración de ingesta SEC (tickers + límites)
+# Date: 2026-01-07 (America/Santiago)
+# Reviewed by: Joaquin Cabello
+#
+# Notes:
+# - days_back: ventana histórica a consultar (en días).
+# - rate_limit: límite de requests para respetar términos y condiciones.
+# - universe: universo de símbolos a monitorear (tickers).
+#   - exclude: lista de símbolos a excluir (si aplica).
+#   - tickers: lista de objetos {symbol, company, cik}.
+# - cik: opcional, pero recomendado.
+# ==============================================================================
+
+base_url: https://data.sec.gov
+company_tickers_url: https://www.sec.gov/files/company_tickers.json
+submissions_endpoint: /submission/CIK{XXXXXXXXXX}.json                # CIK number padded with 0s for lenght 10
+company_facts: /api/xbrl/companyfacts/CIK{XXXXXXXXXX}.json            # CIK number padded with 0s for lenght 10
+
+ua_default: GRAI Socialytics (contact- support@graianalytics.com)     # Optional by cortesy
+
+rate_limit:              # int|None: límite de requests 10 req/s.
+days_back: 120           # int: días hacia atrás a consideraran los files recolectados
+
+universe:
+  exclude: []
+  tickers:
+  - {symbol: RGTI, company: Rigetti Computing, cik:}
+  - {symbol: QBTS, company: D-Wave Quantum, cik:}
+  - {symbol: IONQ, company: IonQ, cik:}
+  - {symbol: STZ,  company: Constellation Brands, cik:}
+  - {symbol: IBM,  company: IBM, cik:}
+  - {symbol: GGAL, company: Grupo Financiero Galicia, cik:}
+  - {symbol: QUBT, company: Quantum Computing Inc, cik:}
+  - {symbol: MRNA, company: Moderna, cik:}
+  - {symbol: VTWO, company: Vanguard Russell 2000 ETF, cik:}
+  - {symbol: HON,  company: Honeywell International, cik:}
+  - {symbol: CRSP, company: CRISPR Therapeutics, cik:}
+  - {symbol: GOOG, company: Alphabet, cik:}
+  - {symbol: ACHR, company: Archer Aviation, cik:}
+  - {symbol: GEHC, company: GE HealthCare Technologies, cik:}
+  - {symbol: IREN, company: Iris Energy, cik:}
+  - {symbol: INTC, company: Intel, cik:}
+  - {symbol: JPM,  company: JPMorgan Chase, cik:}
+  - {symbol: NVDA, company: Nvidia, cik:}
+  - {symbol: SOFI, company: SoFi Technologies, cik:}
+  - {symbol: TSLA, company: Tesla, cik:}
+  - {symbol: AES,  company: The AES Corporation, cik:}
+  - {symbol: UNH,  company: UnitedHealth Group, cik:}
+  - {symbol: VSCO, company: Victoria's Secret & Co., cik:}
+  - {symbol: YPF,  company: YPF S.A., cik:}
+  - {symbol: ARGT, company: Global X MSCI Argentina ETF, cik:}

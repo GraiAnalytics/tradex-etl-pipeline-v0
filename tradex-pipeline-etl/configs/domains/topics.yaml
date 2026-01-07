@@ -1,0 +1,273 @@
+# ==============================================================================
+# DESCRIPCIÓN
+# ------------------------------------------------------------------------------
+# Este archivo (YAML) define un “snapshot” de tópicos/conceptos a una fecha
+# (as_of) y, para cada concepto, su identificador (concept_id), nombre
+# (concept_name), tipo de driver (driver_type),
+# dimensión de impacto esperada (expected_impact), dirección de impacto
+# (impact_direction) y un horizonte por defecto (default_horizon).
+#
+# PLANTILLA
+# ------------------------------------------------------------------------------
+# topics:
+#   - concept_id: "<K000>"
+#     concept_name: "<CONCEPT_NAME>"
+#     driver_type: "<DRIVER_TYPE>"
+#     expected_impact: "<EXPECTED_IMPACT>"
+#     impact_direction: "+" | "-" | "±"
+#     default_horizon: "ST" | "MT" | "LT"
+# ==============================================================================
+as_of: "2026-01-07"
+
+topics:
+  - concept_id: K001
+    concept_name: Qubits
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K002
+    concept_name: Logical Qubits
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K003
+    concept_name: Quantum Error Correction
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K004
+    concept_name: Quantum Supremacy / Advantage
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K005
+    concept_name: Roadmap Progress
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K006
+    concept_name: Partnerships & Contracts
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K007
+    concept_name: Government Funding / Grants
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "±"
+    default_horizon: ST
+
+  - concept_id: K008
+    concept_name: Quantum Cloud Access (QaaS)
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K009
+    concept_name: Architecture Competition
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "±"
+    default_horizon: LT
+
+  - concept_id: K010
+    concept_name: Funding / Dilution Risk
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "-"
+    default_horizon: ST
+
+  - concept_id: K012
+    concept_name: Strategic Investment
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "±"
+    default_horizon: MT
+
+  - concept_id: K013
+    concept_name: Investor Quality Signal
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "±"
+    default_horizon: MT
+
+  - concept_id: K014
+    concept_name: Valuation Signal
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "±"
+    default_horizon: MT
+
+  - concept_id: K015
+    concept_name: Balance Sheet Strengthening
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K016
+    concept_name: Runway Extension
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K018
+    concept_name: Secondary Offering
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "-"
+    default_horizon: ST
+
+  - concept_id: K019
+    concept_name: Convertible Notes
+    driver_type: Capital Markets
+    expected_impact: Financial
+    impact_direction: "-"
+    default_horizon: ST
+
+  - concept_id: K020
+    concept_name: Physical Qubits
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K021
+    concept_name: Qubit Fidelity
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K022
+    concept_name: Error Rates
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "-"
+    default_horizon: MT
+
+  - concept_id: K023
+    concept_name: Coherence Time
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K024
+    concept_name: Fault-Tolerant Quantum
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: LT
+
+  - concept_id: K025
+    concept_name: Scaling Bottlenecks
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "-"
+    default_horizon: LT
+
+  - concept_id: K026
+    concept_name: Cryogenic Infrastructure
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: LT
+
+  - concept_id: K027
+    concept_name: Photonic Integration
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: LT
+
+  - concept_id: K028
+    concept_name: Neutral Atom Control
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K029
+    concept_name: Enterprise Adoption
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K030
+    concept_name: Government Adoption
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K031
+    concept_name: Defense / DoD Exposure
+    driver_type: Public Sector
+    expected_impact: Strategic
+    impact_direction: "+"
+    default_horizon: LT
+
+  - concept_id: K032
+    concept_name: Quantum-as-a-Service Revenue
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K033
+    concept_name: Early Customer Validation
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K034
+    concept_name: Use-Case Credibility
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K035
+    concept_name: Revenue Visibility
+    driver_type: Commercialization
+    expected_impact: Revenue
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K036
+    concept_name: Hype Cycle Peak
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K038
+    concept_name: Retail FOMO
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT
+
+  - concept_id: K040
+    concept_name: Social Momentum
+    driver_type: Technology
+    expected_impact: Fundamental
+    impact_direction: "+"
+    default_horizon: MT

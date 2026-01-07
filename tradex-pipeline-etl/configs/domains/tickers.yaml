@@ -1,0 +1,63 @@
+#==============================================================================
+# DESCRIPCIÓN
+#------------------------------------------------------------------------------
+# Este archivo (YAML) define un “snapshot” de tickers a una fecha (as_of) y,
+# para cada ticker, su bolsa principal (exchange.name) y el identificador MIC
+# (exchange.mic, estándar ISO 10383) del venue/mercado donde cotiza.
+#
+# PLANTILLA
+#------------------------------------------------------------------------------
+# as_of: "YYYY-MM-DD"
+# tickers:
+#   - ticker: "<TICKER>"
+#     exchange:
+#       name: "<PRIMARY_EXCHANGE_NAME>"
+#       mic: "<EXCHANGE_MIC>"
+#==============================================================================
+as_of: "2026-01-07"
+
+tickers:
+  - ticker: "IONQ"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"
+
+  - ticker: "RGTI"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "QUBT"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "ARQQ"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "IBM"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"
+
+  - ticker: "GOOGL"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "MSFT"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "AMZN"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+
+  - ticker: "QBTS"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"

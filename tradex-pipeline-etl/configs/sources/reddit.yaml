@@ -1,0 +1,17 @@
+# ==============================================================================
+# reddit.yaml — configuración de ingesta Reddit (búsqueda + límites)
+# Date: 2026-01-07 (America/Santiago)
+# Reviewed by: Joaquin Cabello
+#
+# Notes:
+# - rate_limit: límite de requests para respetar cuotas / evitar throttling.
+# - hot_search: tipo de búsqueda.
+#   - true: retorna tendencias / "hot".
+#   - false: retorna posts recientes.
+# - max_results: máximo número de resultados por ejecución (1 a 100).
+# ==============================================================================
+
+rate_limit:               # 100 per minute, 1.6 per second
+
+hot_search: true          # bool : Tipo de busqueda, true son tendencias, false se buscan post recientes
+max_results: 2            # int | None: Maximo numero de resultados obtenido (1 a 100)

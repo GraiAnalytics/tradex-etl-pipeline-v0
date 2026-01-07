@@ -1,0 +1,186 @@
+# ==============================================================================
+# labels.yaml — taxonomía canónica de labels (TradeX)
+# Date: 2026-01-07 (America/Santiago)
+# Reviewed by: Joaquin Cabello - Francisco Meza
+#
+# Notes:
+# - Estructura raíz: `labels` contiene toda la taxonomía versionada.
+# - version: string estable y versionable (ej: "labels/1.0") para compatibilidad hacia atrás.
+# - Cada namespace (topics, event_types, sentiment, asset_classes, document_types, severity)
+#   debe mantener keys estables (snake_case) para evitar breaking changes.
+# - topics:
+#   - `aliases` permite normalización de sinónimos (matching / entity linking).
+# - event_types: describe “qué pasó” (disparo/trigger) y debe ser relativamente compacto.
+# - sentiment:
+#   - `score_range` define buckets numéricos (incluye límites); mantener rangos contiguos y sin gaps.
+# - severity:
+#   - `color` es un hex para UI; mantener consistencia visual entre ambientes.
+# - Recomendación: cambios de naming o eliminación de keys => bump de `labels.version`.
+# ==============================================================================
+
+labels:
+  version: "labels/1.0"
+
+  # ---------------------------
+  # TOPICS / THEMES
+  # ---------------------------
+  topics:
+  
+    quantum_computing:
+      name: "Quantum Computing"
+      aliases: ["Quantum", "QC", "Quantum Tech", "Quantum Information", "Quantum Computing"]
+      description: "Quantum computing hardware, software, error correction, and commercialization"
+
+    ai:
+      name: "Artificial Intelligence"
+      aliases: ["AI", "GenAI", "Machine Learning", "ML", "Deep Learning"]
+      description: "Artificial intelligence and machine learning technologies"
+
+    semiconductors:
+      name: "Semiconductors"
+      aliases: ["Chips", "Semis", "ICs"]
+      description: "Semiconductor industry and chip manufacturing"
+
+    cloud:
+      name: "Cloud Computing"
+      aliases: ["Cloud", "IaaS", "PaaS", "SaaS"]
+      description: "Cloud infrastructure and services"
+
+    cybersecurity:
+      name: "Cybersecurity"
+      aliases: ["Security", "Infosec"]
+      description: "Cybersecurity threats and solutions"
+
+    regulation:
+      name: "Regulation"
+      aliases: ["Regulatory", "Compliance"]
+      description: "Government regulation and policy"
+
+    macro:
+      name: "Macroeconomics"
+      aliases: ["Macro", "Economy", "Inflation", "Rates"]
+      description: "Macroeconomic conditions and indicators"
+
+    earnings:
+      name: "Earnings"
+      aliases: ["Earnings Call", "Results", "Financial Results"]
+      description: "Company earnings and financial performance"
+
+    mna:
+      name: "Mergers & Acquisitions"
+      aliases: ["M&A", "Acquisition", "Merger"]
+      description: "Corporate mergers and acquisitions"
+
+  # ---------------------------
+  # EVENT TYPES (what happened)
+  # ---------------------------
+  event_types:
+    earnings_release:
+      name: "Earnings Release"
+      description: "Quarterly or annual earnings publication"
+
+    guidance_change:
+      name: "Guidance Change"
+      description: "Change in company outlook or guidance"
+
+    product_launch:
+      name: "Product Launch"
+      description: "New product or service announcement"
+
+    partnership:
+      name: "Partnership"
+      description: "Strategic partnership or alliance"
+
+    acquisition:
+      name: "Acquisition"
+      description: "Company acquisition event"
+
+    regulatory_action:
+      name: "Regulatory Action"
+      description: "Regulatory or legal action impacting entity"
+
+    research_publication:
+      name: "Research Publication"
+      description: "Academic or scientific publication"
+
+    social_spike:
+      name: "Social Activity Spike"
+      description: "Unusual increase in social media activity"
+
+  # ---------------------------
+  # SENTIMENT BUCKETS
+  # ---------------------------
+  sentiment:
+    very_negative:
+      label: "Very Negative"
+      score_range: [-1.0, -0.5]
+
+    negative:
+      label: "Negative"
+      score_range: [-0.5, -0.2]
+
+    neutral:
+      label: "Neutral"
+      score_range: [-0.2, 0.2]
+
+    positive:
+      label: "Positive"
+      score_range: [0.2, 0.5]
+
+    very_positive:
+      label: "Very Positive"
+      score_range: [0.5, 1.0]
+
+  # ---------------------------
+  # ASSET CLASSES
+  # ---------------------------
+  asset_classes:
+    equity:
+      name: "Equity"
+    etf:
+      name: "ETF"
+    crypto:
+      name: "Cryptocurrency"
+    fixed_income:
+      name: "Fixed Income"
+    commodity:
+      name: "Commodity"
+
+  # ---------------------------
+  # DOCUMENT / CONTENT TYPES
+  # ---------------------------
+  document_types:
+    tweet:
+      name: "Tweet"
+    reddit_post:
+      name: "Reddit Post"
+    youtube_comment:
+      name: "YouTube Comment"
+    news_article:
+      name: "News Article"
+    journal_article:
+      name: "Journal Article"
+    sec_filing:
+      name: "SEC Filing"
+    arxiv_paper:
+      name: "arXiv Paper"
+
+  # ---------------------------
+  # SEVERITY LABELS (UI / explanation)
+  # ---------------------------
+  severity:
+    low:
+      label: "Low"
+      color: "#22C55E"
+
+    medium:
+      label: "Medium"
+      color: "#FACC15"
+
+    high:
+      label: "High"
+      color: "#F97316"
+
+    critical:
+      label: "Critical"
+      color: "#EF4444"

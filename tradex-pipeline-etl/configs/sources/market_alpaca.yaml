@@ -1,0 +1,28 @@
+# ==============================================================================
+# market_alpaca.yaml — Alpaca Market Data query configuration
+#
+# Documentation: Alpaca Market Data API (Bars) — see Alpaca docs for /v2/stocks/bars
+# API Target:    Alpaca Market Data (stocks bars / historical OHLCV)
+# Date:          2026-01-07 (America/Santiago)
+# Reviewed by:   Joaquin Cabello
+#
+# Notes:
+# Notes:
+# - max_results: máximo de barras por request (1..10000). El API puede devolver menos aunque existan más datos.
+#   - Paginación: revisa siempre `next_page_token` para continuar trayendo páginas.
+# - rate_limit: límite de requests para respetar cuotas / evitar throttling (ej: 200/min ≈ 3.33/s).
+# - next_page_token: cursor de paginación; si está vacío, se inicia desde la primera página.
+# - ticker: símbolo a consultar (ej: "NVDA", "TSLA").
+# - days_back: ventana histórica (en días) para construir el rango temporal de la consulta.
+# - fields: columnas esperadas downstream (OHLCV + vwap); mantener alineado con el parser/feature store.
+# ==============================================================================
+
+max_results: # 1 to 10000, The API may return less, even if there are more available data points in the requested interval. Always check the next_page_token for more pages. 
+rate_limit:  # 200 per minute -> 3.33/s
+next_page_token: 
+
+ticker: 
+days_back: 
+
+fields: [open, high, low, close, volume, vwap]
+

@@ -1,0 +1,206 @@
+#==============================================================================
+# DESCRIPCIÓN
+#------------------------------------------------------------------------------
+# Este archivo (YAML) define un “snapshot” de compañías a una fecha (as_of) y,
+# para cada empresa, su ticker (si aplica), nombre, bolsa principal
+# (exchange.name) y el identificador MIC (exchange.mic, estándar ISO 10383),
+# junto con etiquetas de watchlist (sector/industry/theme), país y estado.
+#
+# PLANTILLA
+#------------------------------------------------------------------------------
+# as_of: "YYYY-MM-DD"
+# tickers:
+#   - ticker: "<TICKER_OR_EMPTY_IF_PRIVATE>"
+#     name: "<COMPANY_NAME>"
+#     exchange:
+#       name: "<PRIMARY_EXCHANGE_NAME_OR_EMPTY>"
+#       mic: "<EXCHANGE_MIC_OR_EMPTY>"
+#     watchlist:
+#       - "sector:<SECTOR>"
+#       - "industry:<INDUSTRY>"
+#       - "theme:<THEME_OR_TAG>"
+#     country: "<COUNTRY_CODE>"
+#     status: "active"
+#==============================================================================
+as_of: "2026-01-07"
+
+tickers:
+  - ticker: "IONQ"
+    name: "IonQ"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "RGTI"
+    name: "Rigetti Computing"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "QUBT"
+    name: "Quantum Computing Inc."
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "ARQQ"
+    name: "Arqit Quantum"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Security"
+      - "theme:Quantum Security"
+    country: "US"
+    status: "active"
+
+  - ticker: "IBM"
+    name: "IBM"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "GOOGL"
+    name: "Alphabet"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "MSFT"
+    name: "Microsoft"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "AMZN"
+    name: "Amazon"
+    exchange:
+      name: "NASDAQ"
+      mic: "XNAS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: ""
+    name: "PsiQuantum"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: ""
+    name: "Quantinuum"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: "QBTS"
+    name: "D-Wave"
+    exchange:
+      name: "NYSE"
+      mic: "XNYS"
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: ""
+    name: "Xanadu"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "Canada"
+    status: "active"
+
+  - ticker: ""
+    name: "Atom Computing"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: ""
+    name: "QuEra"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum Computing"
+      - "theme:Quantum Computing"
+    country: "US"
+    status: "active"
+
+  - ticker: ""
+    name: "SandboxAQ"
+    exchange:
+      name: ""
+      mic: ""
+    watchlist:
+      - "sector:Technology"
+      - "industry:Quantum + AI"
+      - "theme:Quantum + AI"
+    country: "US"
+    status: "active"

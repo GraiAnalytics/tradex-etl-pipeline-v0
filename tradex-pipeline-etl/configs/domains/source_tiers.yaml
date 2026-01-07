@@ -1,0 +1,107 @@
+# ==============================================================================
+# source_tiers.yaml — niveles de calidad/confiabilidad de fuentes (TradeX)
+# Date: 2026-01-07 (America/Santiago)
+# Reviewed by: Joaquin Cabello - Francisco Meza
+#
+# Notes:
+# - Estructura raíz: `source_tiers` contiene la versión, definiciones de tiers y el mapeo fuente→tier.
+# - version: string estable y versionable (ej: "source-tiers/1.0") para compatibilidad hacia atrás.
+# - tiers: define priors de calidad para ponderar señales y establecer pisos de confianza.
+#   - default_weight: peso base para scoring/ponderación (0..1).
+#   - confidence_floor: mínimo de confianza permitido para esa fuente (0..1).
+# - mapping: asigna cada fuente lógica (sec, news, x, reddit, etc.) a un tier por defecto.
+#   - overrides: excepciones dentro de una misma familia (ej: Reuters/Bloomberg dentro de news).
+#   - rationale: justificación humana para auditoría y explainability.
+# - normalization: reglas de fallback/normalización cuando la fuente no coincide con el mapping.
+#   - unknown_source.default_tier: tier por defecto cuando no se reconoce la fuente.
+# - Recomendación: cambios de tiers o remapeos significativos => bump de `source_tiers.version`.
+# ==============================================================================
+source_tiers:
+  version: "source-tiers/1.0"
+
+  # ---------------------------
+  # TIER DEFINITIONS
+  # ---------------------------
+  tiers:
+    tier_1:
+      name: "Authoritative"
+      description: "Primary or official sources"
+      default_weight: 1.0
+      confidence_floor: 0.8
+
+    tier_2:
+      name: "High Quality"
+      description: "Reputable professional sources"
+      default_weight: 0.7
+      confidence_floor: 0.6
+
+    tier_3:
+      name: "Community / Social"
+      description: "User-generated or informal sources"
+      default_weight: 0.4
+      confidence_floor: 0.3
+
+    tier_4:
+      name: "Noisy / Unverified"
+      description: "Low reliability or anonymous sources"
+      default_weight: 0.2
+      confidence_floor: 0.1
+
+  # ---------------------------
+  # SOURCE → TIER MAPPING
+  # ---------------------------
+  mapping:
+
+    # ---- Market / Official
+    sec:
+      tier: tier_1
+      rationale: "Official regulatory filings"
+
+    earnings_call:
+      tier: tier_1
+      rationale: "Company-provided earnings calls"
+
+    alpaca_market_data:
+      tier: tier_1
+      rationale: "Authoritative market data provider"
+
+    # ---- News
+    news:
+      tier: tier_2
+      overrides:
+        reuters: tier_1
+        bloomberg: tier_1
+        wsj: tier_1
+        ft: tier_1
+        cnbc: tier_2
+      rationale: "Professional media"
+
+    # ---- Academic
+    journals:
+      tier: tier_1
+      rationale: "Peer-reviewed academic sources"
+
+    arxiv:
+      tier: tier_2
+      rationale: "Pre-print academic publications"
+
+    # ---- Social
+    x:
+      tier: tier_3
+      rationale: "Social media chatter"
+
+    reddit:
+      tier: tier_3
+      rationale: "Community-driven discussions"
+
+    youtube:
+      tier: tier_3
+      rationale: "User-generated video comments"
+
+  # ---------------------------
+  # OPTIONAL NORMALIZATION RULES
+  # ---------------------------
+  normalization:
+    unknown_source:
+      default_tier: tier_4
+      note: "Fallback tier when source is not recognized"

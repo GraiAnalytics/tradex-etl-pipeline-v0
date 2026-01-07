@@ -1,0 +1,109 @@
+# ==============================================================================
+# DESCRIPCIÓN
+# ------------------------------------------------------------------------------
+# Este archivo (YAML) define un “snapshot” de personas a una fecha (as_of) y, para cada
+# una, su identificador (person_id), nombre (person_name), rol (role),
+# organización asociada (organization) y una categoría (category) para
+# clasificación (ej: Executive, Scientist, Investor).
+#
+# PLANTILLA
+# ------------------------------------------------------------------------------
+# persons:
+#   - person_id: "<P000>"
+#     person_name: "<FULL_NAME>"
+#     role: "<ROLE_TITLE>"
+#     organization: "<ORG_NAME>"
+#     category: "<CATEGORY>"
+# ==============================================================================
+as_of: "2026-01-07"
+
+persons:
+  - person_id: P001
+    person_name: Niccolò de Masi
+    role: CEO
+    organization: IonQ
+    category: Executive
+
+  - person_id: P002
+    person_name: Subodh Kulkarni
+    role: CEO
+    organization: Rigetti Computing
+    category: Executive
+
+  - person_id: P003
+    person_name: Alan Baratz
+    role: CEO
+    organization: D-Wave Quantum
+    category: Executive
+
+  - person_id: P004
+    person_name: Andy Leaver
+    role: CEO
+    organization: Arqit Quantum
+    category: Executive
+
+  - person_id: P005
+    person_name: Arvind Krishna
+    role: CEO
+    organization: IBM
+    category: Executive
+
+  - person_id: P006
+    person_name: Sundar Pichai
+    role: CEO
+    organization: Alphabet
+    category: Executive
+
+  - person_id: P007
+    person_name: Satya Nadella
+    role: CEO
+    organization: Microsoft
+    category: Executive
+
+  - person_id: P008
+    person_name: Andy Jassy
+    role: CEO
+    organization: Amazon
+    category: Executive
+
+  - person_id: P009
+    person_name: Jay Gambetta
+    role: VP Quantum
+    organization: IBM
+    category: Scientist
+
+  - person_id: P010
+    person_name: Hartmut Neven
+    role: Head Quantum AI
+    organization: Google
+    category: Scientist
+
+  - person_id: P011
+    person_name: Scott Aaronson
+    role: Professor
+    organization: UT Austin
+    category: Scientist
+
+  - person_id: P012
+    person_name: John Preskill
+    role: Professor
+    organization: Caltech
+    category: Scientist
+
+  - person_id: P013
+    person_name: Cathie Wood
+    role: CIO
+    organization: ARK Invest
+    category: Investor
+
+  - person_id: P014
+    person_name: Marc Andreessen
+    role: Partner
+    organization: a16z
+    category: Investor
+
+  - person_id: P015
+    person_name: Peter Thiel
+    role: Partner
+    organization: Founders Fund
+    category: Investor
