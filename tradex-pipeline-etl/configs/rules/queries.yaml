@@ -39,6 +39,8 @@ layers:
                   sortBy: submittedDate # str: -> submittedDate | lastUpdatedDate | relevance
                   sortOrder: descending # str: -> ascending | descending
                   max_results: 100      # int: 10 ->  limited to 30000 in slices of at most 2000 at a time
+                  since_date:           # str: YYYYMMDDTTTT
+                  until_date: 
                   id_list:              # string: None
                   
       sec:

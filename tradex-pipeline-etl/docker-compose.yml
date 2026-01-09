@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    environment:
+      DATA_DIR: /app/data
+      RAG_INDEX_DIR: /app/artifacts/rag/my_index
+      PYTHONUNBUFFERED: "1"
+      # Keep this on for safe testing unless you explicitly want real sends/trades:
+      DRY_RUN: "1"
+    env_file:
+      - ../.env 
+    volumes:
+      - ..:/app
+      - data:/app/data
+      - artifacts:/app/artifacts
+      - logs:/app/logs
+    ports:
+      - "8000:8000"
+    command: bash -lc "export PYTHONPATH=/app/tradex-pipeline-etl/src; python -m uvicorn tradex_pipeline.bronze.query_executor:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  data:
+  artifacts:
+  logs:
+

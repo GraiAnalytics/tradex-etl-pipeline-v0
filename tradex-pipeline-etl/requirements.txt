@@ -1,0 +1,74 @@
+# Core (pin numpy<2 to keep compatibility with scikit-learn/pyarrow builds)
+numpy==1.26.4,<2
+pandas==2.2.2
+matplotlib==3.8.0
+PyYAML>=6.0
+requests>=2.31
+click>=8.1
+glob2
+joblib==1.3.2
+scikit-learn==1.3.2
+xgboost==2.0.3
+
+# Data & mercado
+yfinance>=0.2.40
+python-dotenv>=1.0
+
+# Feeds & papers
+feedparser>=6.0.11
+arxiv>=2.1.0
+python-dateutil>=2.8.2
+
+# Parquet IO
+pyarrow==14.0.2
+fastparquet>=2024.5.0
+
+# NLP liviano (si lo usas)
+vaderSentiment>=3.3.2
+# sentence-transformers>=2.7.0   # déjalo comentado si no lo necesitas aún
+
+# Utils
+typer[all]>=0.12
+networkx>=3.2
+pyvis>=0.3.2
+
+# Dev
+pytest>=7.4
+black>=24.3.0
+ruff>=0.4.0
+pre-commit>=3.7.0
+
+# Viewer
+streamlit>=1.30.0
+
+# Reddit
+praw>=7.7.0
+langdetect>=1.0.9
+
+# Messaging / APIs
+twilio>=8.0.0
+httpx>=0.27.0
+openai>=1.40.0
+
+# API Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.25.0
+python-multipart>=0.0.9
+
+# Config / Validation
+pydantic>=2.0.0
+
+# RAG / Retrieval
+faiss-cpu>=1.7.4
+sentence-transformers>=2.7.0
+rank-bm25>=0.2.2
+
+# Alpaca
+alpaca-py>=0.33
+alpaca-trade-api>=3.2,<4
+
+# Fuzzy near-duplicate
+rapidfuzz>=3.6.1
+
+# X Developers Kit
+xdk>=0.5.0
