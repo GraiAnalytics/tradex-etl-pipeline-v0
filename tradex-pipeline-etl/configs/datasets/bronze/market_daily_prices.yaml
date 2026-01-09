@@ -1,0 +1,32 @@
+dataset:
+  key: "market.daily_prices"
+  tier: "bronze"
+  source_system: "market"
+  dataset: "daily_prices"
+  domain: "market"
+  description: "Raw daily OHLCV prices from Alpaca"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/market_alpaca.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "daily_bars"
+
+event_time:
+  field: "<date_field>"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "<symbol_date_key>"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0

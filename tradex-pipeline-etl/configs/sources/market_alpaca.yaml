@@ -17,12 +17,8 @@
 # - fields: columnas esperadas downstream (OHLCV + vwap); mantener alineado con el parser/feature store.
 # ==============================================================================
 
-max_results: # 1 to 10000, The API may return less, even if there are more available data points in the requested interval. Always check the next_page_token for more pages. 
 rate_limit:  # 200 per minute -> 3.33/s
-next_page_token: 
+next_page_param: "next_page_token"
 
-ticker: 
-days_back: 
 
-fields: [open, high, low, close, volume, vwap]
 

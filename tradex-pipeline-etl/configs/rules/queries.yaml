@@ -1,0 +1,195 @@
+version: 1
+description: "Query catalog for Bronze/Silver/Gold"
+
+defaults:
+  timezone: "UTC"
+  language: "en"
+  lookback_minutes: 120
+
+layers:
+  bronze:
+    description: "Raw ingestion queries and source-specific parameters"
+    sources:
+      x:
+        description: "X/Twitter v2"
+        datasets:
+          posts:
+            dataset_key: "x.posts"
+            cursor:
+              type: "page_token"
+            query_templates:
+              - name: "tickers_realtime"
+                purpose: "Track ticker mentions"
+                query: "(AAPL OR OR \"Apple\") lang:en -is:retweet"
+                params:
+                  max_results: 100 # Depends on the plan and disponibility of the month
+
+      arxiv:
+        description: "arXiv research"
+        datasets:
+          papers:
+            dataset_key: "arxiv.papers"
+            cursor:
+              type: "page_token"
+            query_templates:
+              - name: "finance_ml"
+                purpose: "Quant + ML papers"
+                query: "cat:q-fin.* OR cat:cs.LG OR {COMPANIES}"
+                params:
+                  sortBy: submittedDate # str: -> submittedDate | lastUpdatedDate | relevance
+                  sortOrder: descending # str: -> ascending | descending
+                  max_results: 100      # int: 10 ->  limited to 30000 in slices of at most 2000 at a time
+                  id_list:              # string: None
+                  
+      sec:
+        description: "SEC EDGAR"
+        datasets:
+          filings:
+            dataset_key: "sec.filings"
+            cursor:
+              type: "page_token"
+            query_templates:
+              - name: "10k_10q"
+                purpose: "Core filings"
+                params:
+                  forms: ["10-K", "10-Q"] 
+                  tickers_ref: "domains/tickers.yaml"
+
+      rss:
+        description: "RSS feeds"
+        datasets:
+          news_articles:
+            dataset_key: "news.articles_rss"
+            cursor:
+              type: "None"
+            query_templates:
+              - name: "news_default"
+                purpose: "News RSS feeds"
+                params:
+                  section: "rss_news"
+          journals_articles:
+            dataset_key: "journals.articles_rss"
+            cursor:
+              type: "None"
+            query_templates:
+              - name: "journals_default"
+                purpose: "Journals RSS feeds"
+                params:
+                  section: "rss_journals"
+
+      reddit:
+        description: "Reddit API"
+        datasets:
+          posts:
+            dataset_key: "reddit.posts"
+            cursor:
+              type: "page_token"
+            tweet_fields: [ 
+                    "article",
+                    "attachments",
+                    "author_id",
+                    "card_uri",
+                    "community_id",
+                    "context_annotations",
+                    "conversation_id",
+                    "created_at",
+                    "display_text_range",
+                    "edit_controls",
+                    "edit_history_tweet_ids",
+                    "entities",
+                    "geo",
+                    "id",
+                    "in_reply_to_user_id",
+                    "lang",
+                    "media_metadata",
+                    # "non_public_metrics",
+                    "note_tweet",
+                    # "organic_metrics",
+                    "possibly_sensitive",
+                    # "promoted_metrics",
+                    "public_metrics",
+                    "referenced_tweets",
+                    "reply_settings",
+                    "scopes",
+                    "source",
+                    "suggested_source_links",
+                    "suggested_source_links_with_counts",
+                    "text",
+                    "withheld"
+                  ]
+            expansions: [
+                  "author_id",
+                  "referenced_tweets.id",
+                  "edit_history_tweet_ids",
+                  "in_reply_to_user_id",
+                  "attachments.media_keys",
+                  "attachments.poll_ids",
+                  "geo.place_id",
+                  "entities.mentions.username",
+                  "referenced_tweets.id.author_id"
+                  ]
+            query_templates:
+              - name: "tickers_recent"
+                purpose: "Track ticker mentions"
+                params:
+                  query: "{TICKERS}"
+                  hot_search: false           # bool : Tipo de busqueda, true son tendencias, false se buscan post recientes
+                  max_results: 2              # int | None: Maximo numero de resultados obtenido (1 a 100)
+
+      market_alpaca:
+        description: "Alpaca Market Data"
+        datasets:
+          daily_prices:
+            dataset_key: "market.daily_prices"
+            cursor:
+              type: "date"
+            query_templates:
+              - name: "daily_bars"
+                purpose: "Daily OHLCV"
+                params:
+                  timeframe: "1Day"
+                  max_results: # 1 to 10000, The API may return less, even if there are more available data points in the requested interval. Always check the next_page_token for more pages. 
+                  rate_limit:  # 200 per minute -> 3.33/s
+                  next_page_token: 
+                  days_back: 30
+                  fields: [open, high, low, close, volume, vwap]
+                  max_results: # 1 to 10000, The API may return less, even if there are more available data points in the requested interval. Always check the next_page_token for more pages. 
+
+  silver:
+    description: "Canonical transforms (not raw queries)"
+    datasets:
+      silver_social_events:
+        inputs: ["x.posts", "reddit.posts", "youtube.comments", "news.articles_rss", "journals.articles_rss"]
+        rules:
+          language_allowlist: ["en", "es"]
+          text_normalization: true
+          entity_resolution: true
+
+      silver_market_daily:
+        inputs: ["market.daily_prices"]
+        rules:
+          compute_returns: true
+
+  gold:
+    description: "Business metrics, baselines, signals, UI"
+    datasets:
+      gold_social_entity_day:
+        inputs: ["silver_social_events"]
+        metrics:
+          - name: "mentions_1d"
+            window_days: 1
+          - name: "engagement_score_7d"
+            window_days: 7
+
+      gold_baselines_entity_day:
+        inputs: ["gold_social_entity_day", "gold_market_entity_day"]
+        baselines:
+          - name: "mentions_30d_mean"
+            window_days: 30
+
+      gold_signal_events:
+        inputs: ["gold_social_entity_day", "gold_market_entity_day", "gold_baselines_entity_day"]
+        signals:
+          - name: "social_spike"
+            version: "v1"
+            rule: "mentions_1d > 3 * mentions_30d_mean"

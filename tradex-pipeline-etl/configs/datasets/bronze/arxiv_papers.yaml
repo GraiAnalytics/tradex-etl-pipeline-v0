@@ -1,0 +1,32 @@
+dataset:
+  key: "arxiv.papers"
+  tier: "bronze"
+  source_system: "arxiv"
+  dataset: "papers"
+  domain: "research"
+  description: "Raw arXiv papers"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/arxiv.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "finance_ml"
+
+event_time:
+  field: "<published_at>"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "<arxiv_id>"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0

@@ -11,7 +11,7 @@
 # - max_results: máximo número de resultados por ejecución (1 a 100).
 # ==============================================================================
 
-rate_limit:               # 100 per minute, 1.6 per second
+rate_limit: 1.66          # 100 per minute, 1.6 per second
+page_token_param: "after" # fullname of a thing
 
-hot_search: true          # bool : Tipo de busqueda, true son tendencias, false se buscan post recientes
-max_results: 2            # int | None: Maximo numero de resultados obtenido (1 a 100)
+

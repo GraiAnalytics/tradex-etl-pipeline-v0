@@ -11,3 +11,4 @@
 
 max_items: 100           # int|None: límite global de ítems por feed (vacío = sin override / depende del runner)
 lang_whitelist: [en, es] # list[str]: idiomas permitidos (ej: [en, es])
+rate_limit: 0.33         # Not especific, but generous for each side

@@ -1,0 +1,32 @@
+dataset:
+  key: "sec.filings"
+  tier: "bronze"
+  source_system: "sec"
+  dataset: "filings"
+  domain: "filings"
+  description: "Raw SEC EDGAR filings"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/sec.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "10k_10q"
+
+event_time:
+  field: "<filing_date>"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "<accession_number>"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0

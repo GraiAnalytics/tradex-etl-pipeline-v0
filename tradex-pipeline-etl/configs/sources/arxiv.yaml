@@ -12,15 +12,7 @@
 # - Rate limiting: keep <= 1 request every ~3 seconds across machines.
 # ==============================================================================
 
-
-search_query:   # string: None
-id_list:        # string: None
-start:          # int: 0 -> defines the index of the first returned result, using 0-based indexing.
-max_results:    # int: 10 ->  limited to 30000 in slices of at most 2000 at a time
-rate_limit:     # float: 0.33 -> request/second. the rate limit is 1 requeste every 3 seconds on all machines
-
-sortBy: submittedDate # str: -> submittedDate | lastUpdatedDate | relevance
-sortOrder: descending # str: -> ascending | descending
-
+rate_limit: 0.33    # float: 0.33 -> request/second. the rate limit is 1 request every 3 seconds on all machines
 submission_hour: T0000 # 00:00 US Eastern Time 
+page_token_param: "start"          # int: 0 -> defines the index of the first returned result, using 0-based indexing.
 

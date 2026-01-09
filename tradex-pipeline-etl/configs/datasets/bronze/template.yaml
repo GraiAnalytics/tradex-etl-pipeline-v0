@@ -1,0 +1,33 @@
+# configs/datasets/bronze/_template.yaml
+dataset:
+  key: "<source_system>.<dataset>"
+  tier: "bronze"
+  source_system: "<source_system>"
+  dataset: "<dataset>"
+  domain: "<social|news|research|filings|market>"
+  description: "<one-line description>"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/<source_config>.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "<template_name>"
+
+event_time:
+  field: "<source_field_path>"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "<source_id_field_or_null>"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0

@@ -19,8 +19,10 @@ company_facts: /api/xbrl/companyfacts/CIK{XXXXXXXXXX}.json            # CIK numb
 
 ua_default: GRAI Socialytics (contact- support@graianalytics.com)     # Optional by cortesy
 
-rate_limit:              # int|None: límite de requests 10 req/s.
+rate_limit: 10           # int|None: límite de requests 10 req/s.
 days_back: 120           # int: días hacia atrás a consideraran los files recolectados
+
+page_token_param: "from" # 0 for the first 50 filings, 50 for the next and so on.
 
 universe:
   exclude: []

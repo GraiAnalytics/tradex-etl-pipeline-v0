@@ -1,0 +1,32 @@
+dataset:
+  key: "x.posts"
+  tier: "bronze"
+  source_system: "x"
+  dataset: "posts"
+  domain: "social"
+  description: "Raw posts from X API v2"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/x_basic.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "tickers_realtime"
+
+event_time:
+  field: "created_at"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "id"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0

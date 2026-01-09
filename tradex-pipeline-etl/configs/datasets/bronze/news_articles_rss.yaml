@@ -1,0 +1,32 @@
+dataset:
+  key: "news.articles_rss"
+  tier: "bronze"
+  source_system: "news"
+  dataset: "articles_rss"
+  domain: "news"
+  description: "Raw RSS news articles"
+  enabled: true
+
+source:
+  config_ref: "configs/sources/rss.yaml"
+  query_catalog_ref: "configs/rules/queries.yaml"
+  query_template: "news_default"
+
+event_time:
+  field: "<published_at>"
+  timezone: "UTC"
+
+dedup:
+  source_record_id_field: "<guid_or_url>"
+  key_template: "{dataset_key}:{source_record_id}"
+
+envelope:
+  schema_version: "bronze-envelope/1.0"
+
+storage:
+  format: "jsonl"
+  compression: "gzip"
+  partitioning: ["ingest_date", "run_id"]
+
+quality:
+  max_parse_error_pct: 1.0
